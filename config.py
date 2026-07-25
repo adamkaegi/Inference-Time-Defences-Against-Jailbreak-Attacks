@@ -72,7 +72,7 @@ def model_max_tokens_for_attack(attack_name: str) -> int:
 
 # PAIR uses a fixed query budget and fixed per-stream seeds.  Matrix runs cache
 # the selected candidate so every defense receives the exact same attack.
-PAIR_NUM_STREAMS = 3
+PAIR_NUM_STREAMS = 5
 PAIR_MAX_ROUNDS = 5
 PAIR_ATTACKER_MODEL = "dolphin-mistral:7b"
 PAIR_ATTACKER_TEMPERATURE = 0.7
