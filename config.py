@@ -54,6 +54,17 @@ HARMBENCH_ALLOW_CPU = os.getenv("HARMBENCH_ALLOW_CPU", "").lower() in {
     "true",
     "yes",
 }
+WILDGUARD_MODEL = "allenai/wildguard"
+# Pinned official model-card revision, rather than a moving main branch.
+WILDGUARD_MODEL_REVISION = "94802860f7ce599fc28750f0d505cfed7aeca3b5"
+WILDGUARD_BATCH_SIZE = 1
+WILDGUARD_MAX_RESPONSE_LENGTH = 4096
+WILDGUARD_MAX_NEW_TOKENS = 32
+WILDGUARD_ALLOW_CPU = os.getenv("WILDGUARD_ALLOW_CPU", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
 MODEL_TEMPERATURE = 0
 MODEL_SEED = 42
 # Keep ordinary generations short. DeepInception needs additional room because
@@ -120,6 +131,7 @@ SMOOTHLLM_PERTURBATION_RATE = 0.10
 #   harmbench_mistral_7b_val_cls  - binary HarmBench validation classifier;
 #                                    available here as a final pipeline stage,
 #                                    but not HarmBench's canonical test metric.
+#   wildguard_refusal             - local WildGuard refusal/compliance classifier.
 #   jbb_refusal_llama3_8b         - JBB refusal classifier (Refused/Not Refused).
 #   jailbreak_bench_llama8b       - compatibility alias for the JBB refusal judge.
 ATTACK = "deepinception"

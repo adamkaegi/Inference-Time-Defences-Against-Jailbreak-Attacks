@@ -16,3 +16,13 @@ class Defense(ABC):
     @abstractmethod
     def apply(self, text: str) -> str:
         ...
+
+    def apply_with_context(self, text: str, *, prompt: str) -> str:
+        """Apply a defense with the model-facing prompt when it is available.
+
+        Most defenses only need the text at their own stage. Output classifiers
+        that evaluate a conversation can override this hook to inspect both the
+        user prompt and assistant response without changing the simple ``apply``
+        contract used by existing defenses.
+        """
+        return self.apply(text)

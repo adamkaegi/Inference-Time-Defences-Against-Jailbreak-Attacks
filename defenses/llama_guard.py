@@ -79,10 +79,18 @@ def build_input_guard_conversation(text: str) -> list[dict[str, str]]:
     return [{"role": "user", "content": text}]
 
 
-def build_output_guard_conversation(response: str) -> list[dict[str, str]]:
+def build_output_guard_conversation(
+    prompt: str,
+    response: str,
+) -> list[dict[str, str]]:
+    if not isinstance(prompt, str):
+        raise TypeError("input prompt must be a string")
     if not isinstance(response, str):
         raise TypeError("target response must be a string")
-    return [{"role": "assistant", "content": response}]
+    return [
+        {"role": "user", "content": prompt},
+        {"role": "assistant", "content": response},
+    ]
 
 
 class GuardClassifier:
@@ -208,7 +216,15 @@ class LlamaGuardOutputDefense(_LlamaGuardDefense):
     stage = "output"
 
     def apply(self, text: str) -> str:
-        conversation = build_output_guard_conversation(text)
+        # Keep the plain Defense interface usable for direct callers. The
+        # response pipeline calls apply_with_context so real runs classify the
+        # complete user/assistant exchange.
+        conversation = [{"role": "assistant", "content": text}]
+        decision = self.classifier.classify_conversation(conversation)
+        return self._apply_decision(text, decision)
+
+    def apply_with_context(self, text: str, *, prompt: str) -> str:
+        conversation = build_output_guard_conversation(prompt, text)
         decision = self.classifier.classify_conversation(conversation)
         return self._apply_decision(text, decision)
 

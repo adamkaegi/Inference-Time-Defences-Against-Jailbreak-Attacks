@@ -14,6 +14,21 @@ class _SuffixOutputDefense(Defense):
         return f"{text}|checked"
 
 
+class _ContextOutputDefense(Defense):
+    name = "context"
+    stage = "output"
+
+    def __init__(self) -> None:
+        self.seen = None
+
+    def apply(self, text: str) -> str:
+        raise AssertionError("pipeline should use the context-aware hook")
+
+    def apply_with_context(self, text: str, *, prompt: str) -> str:
+        self.seen = (prompt, text)
+        return text
+
+
 class SmoothLLMTests(unittest.TestCase):
     def test_returns_a_response_from_the_majority_class(self) -> None:
         responses = iter(["jailbroken-1", "jailbroken-2", "jailbroken-3", "refusal"])
@@ -72,6 +87,27 @@ class SmoothLLMTests(unittest.TestCase):
         self.assertEqual(len(generated), 3)
         self.assertTrue(result.startswith("response-"))
         self.assertTrue(result.endswith("|checked"))
+
+    def test_pipeline_gives_output_defense_prompt_and_selected_response(self) -> None:
+        context = _ContextOutputDefense()
+        smooth = SmoothLLMDefense(
+            num_samples=1,
+            perturbation_rate=0,
+            generator=lambda prompt: "selected response",
+            jailbreak_classifier=lambda response: True,
+        )
+
+        result = build_response_chain(
+            [smooth, context],
+            "unused-outer-model",
+            dry_run=True,
+        ).invoke("model-facing prompt")
+
+        self.assertEqual(result, "selected response")
+        self.assertEqual(
+            context.seen,
+            ("model-facing prompt", "selected response"),
+        )
 
     def test_generation_failure_is_surfaced(self) -> None:
         def fail(prompt: str) -> str:

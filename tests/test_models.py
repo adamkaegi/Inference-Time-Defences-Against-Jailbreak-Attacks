@@ -39,6 +39,9 @@ class ModelConfigurationTests(unittest.TestCase):
     def test_requested_harmbench_judge_is_registered(self) -> None:
         self.assertIn("harmbench_mistral_7b_val_cls", JUDGES)
 
+    def test_wildguard_refusal_judge_is_registered(self) -> None:
+        self.assertIn("wildguard_refusal", JUDGES)
+
 
 if __name__ == "__main__":
     unittest.main()

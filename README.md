@@ -73,6 +73,8 @@ scripts/     shell scripts that run main.py multiple times consecutively
   (maximally useful harmful assistance)
 - **Judge** `harmbench_mistral_7b_val_cls` — official binary HarmBench Mistral
   validation classifier (`Unsafe`/1 for Yes, `Safe`/0 for No)
+- **Judge** `wildguard_refusal` — pinned local WildGuard 7B classifier
+  (`Refused`/1 or `Not Refused`/0)
 - **Judge** `jbb_refusal_llama3_8b` — JailbreakBench Llama 3 8B refusal
   classifier (`Refused`/1 or `Not Refused`/0); the old
   `jailbreak_bench_llama8b` name remains as a CLI alias
@@ -98,13 +100,16 @@ ollama serve # separate terminal
 python scripts\pull_models.py
 python scripts\prefetch_strongreject.py
 python scripts\prefetch_harmbench.py
+python scripts\prefetch_wildguard.py
 python scripts\fetch_jailbreakbench_prompts.py
-ollama pull llama3:8b # local JBB refusal provider
+ollama pull llama3:8b # only needed for the optional JBB refusal baseline
 ```
 
-The two evaluator prefetch commands download large Hugging Face checkpoints;
-HarmBench is approximately 14.5 GB. StrongREJECT also requires accepting the
-`google/gemma-2b` license and setting `HF_TOKEN` in `.env`.
+The evaluator prefetch commands download large Hugging Face checkpoints;
+HarmBench and WildGuard are each approximately 14.5 GB. WildGuard requires
+accepting the AI2 Responsible Use Guidelines on its Hugging Face model page;
+StrongREJECT requires accepting the `google/gemma-2b` license. Set `HF_TOKEN`
+in `.env` before running either gated checkpoint's prefetch command.
 
 The JBB refusal judge defaults to the installed Ollama model. For the exact
 Together route used by JailbreakBench, set these in `.env`:
@@ -158,7 +163,8 @@ python main.py --batch instructions --defense sample_bye_adam_input,sample_bye_a
 python main.py --judge sample_safe_unsafe             # lightweight debug judge
 python main.py --judge strongreject                   # continuous harmful score
 python main.py --judge harmbench_mistral_7b_val_cls   # binary validation classifier
-python main.py --judge jbb_refusal_llama3_8b          # refusal classification
+python main.py --judge wildguard_refusal              # local WildGuard refusal classification
+python main.py --judge jbb_refusal_llama3_8b          # JBB refusal classification
 python main.py --dry-run                              # no Ollama, tests wiring
 ```
 
@@ -266,6 +272,8 @@ Nothing in `pipeline.py` or `main.py` changes when you do.
   StrongREJECT adapter and Gemma base.
 - `scripts/prefetch_harmbench.py` — downloads and smoke-tests the pinned
   HarmBench Mistral validation classifier.
+- `scripts/prefetch_wildguard.py` — downloads and smoke-tests the pinned
+  WildGuard refusal classifier.
 - `scripts/judge_csv.py` — applies a judge to cached responses without
   regenerating target-model output; it always writes a new CSV.
 - `scripts/evaluate_matrix.py` — adds the selected final labels to cached runs
