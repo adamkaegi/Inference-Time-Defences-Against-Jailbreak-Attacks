@@ -1,11 +1,11 @@
 """Run the research attack/defense matrix and evaluate every cached response.
 
-Examples:
-    python run_attack_defense_matrix.py
-    python run_attack_defense_matrix.py --quick
-    python run_attack_defense_matrix.py --model dolphin-mistral:7b
-    python run_attack_defense_matrix.py --defense self_reminder,perplexity,llama_guard_output
-    python run_attack_defense_matrix.py --defense none --defense self_reminder,perplexity
+Examples (run from the project root):
+    python -m core.run_attack_defense_matrix
+    python -m core.run_attack_defense_matrix --quick
+    python -m core.run_attack_defense_matrix --model dolphin-mistral:7b
+    python -m core.run_attack_defense_matrix --defense self_reminder,perplexity,llama_guard_output
+    python -m core.run_attack_defense_matrix --defense none --defense self_reminder,perplexity
 
 Each repeated ``--defense`` value is one matrix column.  Names within a value
 are a stack and are passed to ``main.py`` in the given order.
@@ -23,9 +23,9 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-import config
 from attacks import ATTACKS
-from console_io import configure_utf8_stdio
+from core import config
+from core.console_io import configure_utf8_stdio
 from defenses import DEFENSES
 from main import _load_resume_rows
 from prompts import load_batch
@@ -33,7 +33,7 @@ from scripts.evaluate_matrix import evaluate_matrix
 from scripts.fetch_jailbreakbench_prompts import JBB_DATA_REVISION
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ATTACKS = ("none", "deepinception", "gcg", "pair")
 DEFAULT_DEFENSE_STACKS = (
     "none",

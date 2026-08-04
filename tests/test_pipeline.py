@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from langchain_core.runnables import RunnableLambda
 
-import config
+from core import config
 from attacks.base import Attack
-from pipeline import _make_model, build_chain, build_response_chain
+from core.pipeline import _make_model, build_chain, build_response_chain
 
 
 class _CountingAttack(Attack):

@@ -6,7 +6,7 @@ from attacks.base import Attack
 from defenses.base import Defense
 from defenses.block import DefenseBlocked
 from main import _invoke_chain
-from pipeline import build_chain
+from core.pipeline import build_chain
 
 
 class IdentityAttack(Attack):

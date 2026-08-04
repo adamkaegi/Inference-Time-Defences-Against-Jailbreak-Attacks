@@ -6,7 +6,7 @@ import random
 import string
 from collections.abc import Callable
 
-import config
+from core import config
 from judges.sample_safe_unsafe import looks_like_refusal
 from .base import Defense
 

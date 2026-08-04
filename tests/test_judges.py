@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-import config
+from core import config
 from judges.base import Judge
 from judges.harmbench_mistral import (
     _MODEL_CACHE as HARMBENCH_MODEL_CACHE,

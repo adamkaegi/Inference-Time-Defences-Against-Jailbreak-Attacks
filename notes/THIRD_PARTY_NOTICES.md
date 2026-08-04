@@ -87,3 +87,69 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Attack techniques
+
+These attacks are this project's own implementations of published jailbreak
+techniques. No third-party source code is vendored, so no license is
+reproduced; each entry cites the paper the implementation follows.
+
+- **`attacks/deepinception.py` (`deepinception`, alias `template`)** —
+  five-layer nested-scene template from Li et al., *"DeepInception: Hypnotize
+  Large Language Model to Be Jailbreaker"* (arXiv:2311.03191).
+- **`attacks/gcg.py` (`gcg`)** — fixed transfer-suffix baseline in the style of
+  Zou et al., *"Universal and Transferable Adversarial Attacks on Aligned
+  Language Models"* (arXiv:2307.15043, the GCG paper). This module appends a
+  static suffix checked into this repo; it does not run the paper's
+  gradient-based coordinate search.
+- **`attacks/pair.py` (`pair`)** — iterative black-box refinement loop in the
+  style of Chao et al., *"Jailbreaking Black Box Large Language Models in
+  Twenty Queries"* (arXiv:2310.08419, the PAIR paper). The attacker system
+  prompt, feedback format, and stopping rule are this project's own, not
+  copied from the authors' reference implementation.
+
+## Defense techniques
+
+Same basis as above: original code implementing a published defense idea, no
+vendored source.
+
+- **`defenses/smoothllm.py` (`smoothllm`)** — randomized-smoothing majority
+  vote in the style of Robey et al., *"SmoothLLM: Defending Large Language
+  Models Against Jailbreaking Attacks"* (arXiv:2310.03684).
+- **`defenses/self_reminder.py` (`self_reminder`)** — system-prompt
+  prefix/suffix wrapper in the style of Xie et al., *"Defending ChatGPT
+  Against Jailbreak Attack via Self-Reminders"* (Nature Machine Intelligence,
+  2023).
+- **`defenses/perplexity.py` (`perplexity`)** — perplexity-threshold input
+  filter in the style of the perplexity-filtering baseline described in Jain
+  et al., *"Baseline Defenses for Adversarial Attacks Against Aligned
+  Language Models"* (arXiv:2309.00614), and Alon & Kamfonas, *"Detecting
+  Language Model Attacks with Perplexity"* (arXiv:2308.14132). Scoring uses
+  `gpt2` (see Models below) as the local perplexity model.
+- **`defenses/llama_guard.py` (`llama_guard_input` / `llama_guard_output`)** —
+  input/output filter wired to Meta's Llama Guard 3 classifier, including its
+  published `S1`–`S13` safety-category taxonomy from Inan et al., *"Llama
+  Guard: LLM-based Input-Output Safeguard for Human-AI Conversations"*
+  (arXiv:2312.06674). The filter/parsing code here is original; the
+  classification itself is produced by Meta's model weights (see Models
+  below).
+
+## Third-party model weights invoked at runtime
+
+None of these weights are vendored in this repository — they are pulled
+through Ollama (`scripts/pull_models.py`) or downloaded from Hugging Face on
+first use, and each remains subject to its own upstream license. Check the
+linked model's card for current terms before redistributing anything derived
+from a run.
+
+| Model | Used for | Provider |
+| --- | --- | --- |
+| `qwen2.5:7b-instruct`, `qwen2.5:3b` | Default/alternate target models | Alibaba Qwen |
+| `dolphin-mistral:7b` | Alternate target model; PAIR attacker/judge model | Cognitive Computations (Mistral base) |
+| `llama-guard3:1b` | `llama_guard_input` / `llama_guard_output` classifier | Meta |
+| `llama3:8b` | Local JBB refusal judge (`jbb_refusal_llama3_8b`, Ollama route) | Meta |
+| `meta-llama/Llama-3-8b-chat-hf` | JBB refusal judge, Together-hosted route | Meta (via Together AI) |
+| `google/gemma-2b` | Base model for the fine-tuned StrongREJECT evaluator; gated, requires `HF_TOKEN` | Google |
+| `qylu4156/strongreject-15k-v1` | Fine-tuned StrongREJECT evaluator weights | dsbowen / StrongREJECT project (see StrongREJECT above) |
+| `cais/HarmBench-Mistral-7b-val-cls` | HarmBench validation classifier weights | centerforaisafety (see HarmBench above) |
+| `gpt2` | Local perplexity scoring in `defenses/perplexity.py` | OpenAI (MIT-licensed) |

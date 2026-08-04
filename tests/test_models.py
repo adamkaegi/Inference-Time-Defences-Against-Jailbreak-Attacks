@@ -1,6 +1,6 @@
 import unittest
 
-import config
+from core import config
 from defenses import DEFENSES
 from defenses.smoothllm import SmoothLLMDefense
 from judges import JUDGES

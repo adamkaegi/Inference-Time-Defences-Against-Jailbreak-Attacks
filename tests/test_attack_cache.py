@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from attack_cache import AttackOutputCache
+from core.attack_cache import AttackOutputCache
 from main import _apply_attack
 
 

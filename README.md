@@ -25,8 +25,8 @@ attacks/     one file per attack + context-only base.py + registry in __init__.p
 defenses/    one file per defense + context-only base.py + registry in __init__.py
 judges/      one file per judge + context-only base.py + runtime compatibility
 prompts/     one .txt per batch (one prompt per line) + loader
-config.py    model / attack / defense / batch defaults
-pipeline.py  builds the LCEL chain
+core/        shared internals: config.py, pipeline.py, attack_cache.py,
+             console_io.py, evaluation_reporting.py, run_attack_defense_matrix.py
 main.py      CLI entry point
 outputs/     CSV files written per run
 scripts/     shell scripts that run main.py multiple times consecutively
@@ -147,13 +147,13 @@ The CLI accepts these flags:
 
 A `prompt` is optional. If you omit it, the selected batch runs instead.
 
-Defaults live in `config.py`; every one is overridable with the flags above.
+Defaults live in `core/config.py`; every one is overridable with the flags above.
 
 ## Run
 
 ```bash
 python main.py "What is the capital of France?"       # single prompt
-python main.py                                        # batch from config.py
+python main.py                                        # batch from core/config.py
 python main.py --batch instructions --defense sample_bye_adam_input,sample_bye_adam_output
 python main.py --judge sample_safe_unsafe             # lightweight debug judge
 python main.py --judge strongreject                   # continuous harmful score
@@ -179,7 +179,7 @@ Run the complete attack/defense experiment, including benign no-attack
 usability cells, with:
 
 ```powershell
-.venv\Scripts\python.exe run_attack_defense_matrix.py
+.venv\Scripts\python.exe -m core.run_attack_defense_matrix
 ```
 
 The default experiment is 30 cells: four attacks × six defense conditions on
@@ -199,7 +199,7 @@ UTF-8 checkpoint, and the manifest is updated after each cell.
 If a run is interrupted, resume it without regenerating completed responses:
 
 ```powershell
-.venv\Scripts\python.exe run_attack_defense_matrix.py `
+.venv\Scripts\python.exe -m core.run_attack_defense_matrix `
   --quick `
   --resume `
   --output-dir outputs\matrix-YYYYMMDD-HHMMSS-ID
@@ -250,11 +250,11 @@ as a valid observation.
 - New judge: add a file in `judges/`, subclass `Judge`, register it in `judges/__init__.py`.
 - New batch: drop a `.txt` file in `prompts/` — it's auto-discovered by its filename.
 
-Nothing in `pipeline.py` or `main.py` changes when you do.
+Nothing in `core/pipeline.py` or `main.py` changes when you do.
 
 ## Scripts
 
-- `run_attack_defense_matrix.py` — runs the full research attack × defense
+- `python -m core.run_attack_defense_matrix` — runs the full research attack × defense
   matrix on harmful prompts plus no-attack benign usability cells, caches each
   response once, and then uses HarmBench plus the JBB refusal judge. Repeat
   `--judge` to select a subset explicitly. Use
