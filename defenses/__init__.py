@@ -6,6 +6,7 @@ from .self_reminder import SelfReminderDefense
 from .none import NoOpDefense
 from .perplexity import PerplexityDefense
 from .llama_guard import LlamaGuardInputDefense, LlamaGuardOutputDefense
+from .deep_align import DeepAlignDefense
 
 # Available defenses (comma-separate multiple choices on the CLI):
 # - smoothllm: generates perturbed responses and selects from the majority class.
@@ -13,6 +14,9 @@ from .llama_guard import LlamaGuardInputDefense, LlamaGuardOutputDefense
 # - perplexity: blocks high-perplexity input prompts.
 # - llama_guard_input: blocks prompts classified unsafe by Llama Guard.
 # - llama_guard_output: replaces outputs classified unsafe by Llama Guard.
+# - deep_align: steers the target model's own hidden states away from harmful
+#   continuations at generation time (runtime approximation of DeepAlign,
+#   Zhang et al. NDSS 2026; loads the target via transformers, not Ollama).
 # - sample_bye_adam_input: original input-stage wiring example.
 # - sample_bye_adam_output: original output-stage wiring example.
 # - none: no-op baseline.
@@ -27,5 +31,6 @@ DEFENSES: dict[str, Defense] = {
         PerplexityDefense(),
         LlamaGuardInputDefense(),
         LlamaGuardOutputDefense(),
+        DeepAlignDefense(),
     )
 }

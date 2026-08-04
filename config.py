@@ -112,7 +112,8 @@ SMOOTHLLM_PERTURBATION_RATE = 0.10
 # before the target; output defenses run afterward. Within each stage, the
 # listed order is preserved:
 #   none, self_reminder, smoothllm, perplexity, llama_guard_input,
-#   llama_guard_output, sample_bye_adam_input, sample_bye_adam_output
+#   llama_guard_output, deep_align, sample_bye_adam_input,
+#   sample_bye_adam_output
 #
 # JUDGE selects one post-generation evaluator:
 #   sample_safe_unsafe            - keyword-based wiring/debug judge.
@@ -122,10 +123,10 @@ SMOOTHLLM_PERTURBATION_RATE = 0.10
 #                                    but not HarmBench's canonical test metric.
 #   jbb_refusal_llama3_8b         - JBB refusal classifier (Refused/Not Refused).
 #   jailbreak_bench_llama8b       - compatibility alias for the JBB refusal judge.
-ATTACK = "deepinception"
-DEFENSE = "none"
-JUDGE = "sample_safe_unsafe"
-BATCH = "general"  # prompt batch = a .txt file stem in prompts/
+ATTACK = "none"
+DEFENSE = "deep_align"
+JUDGE = "harmbench_mistral_7b_val_cls"
+BATCH = "jailbreakbench_harmful_10"  # prompt batch = a .txt file stem in prompts/
 
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "")
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY", "")
@@ -149,3 +150,36 @@ LLAMA_GUARD_FAILURE_POLICY = "raise"  # allow | block | raise
 LLAMA_GUARD_BLOCKED_RESPONSE = (
     "I can't help with that request because it may produce unsafe or harmful content."
 )
+
+# DeepAlign: runtime contrastive hidden-state steering, approximating the
+# fine-tuning defense of Zhang et al., "Bleeding Pathways: Vanishing
+# Discriminability in LLM Hidden States Fuels Jailbreak Attacks" (NDSS 2026).
+# The paper trains new model weights; this is an inference-time analog that
+# adds a precomputed "safe direction" to hidden states at the target model's
+# own middle/late decoder layers during generation, via forward hooks, so it
+# can be wired into this repo's Ollama-backed pipeline without a training run.
+#
+# DeepAlign requires raw hidden-state access, which Ollama does not expose, so
+# it loads the target model directly through Hugging Face `transformers`
+# instead. DEEP_ALIGN_HF_MODEL_MAP resolves the CLI --model (an Ollama tag) to
+# the matching HF repo id; unmapped models fall back to DEEP_ALIGN_MODEL.
+DEEP_ALIGN_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+DEEP_ALIGN_HF_MODEL_MAP = {
+    "qwen2.5:7b-instruct": "Qwen/Qwen2.5-7B-Instruct",
+    "qwen2.5:3b": "Qwen/Qwen2.5-3B-Instruct",
+    "llama3.2:3b": "meta-llama/Llama-3.2-3B-Instruct",
+}
+DEEP_ALIGN_DEVICE = "auto"  # auto | cpu | cuda | mps
+# Fraction of decoder depth to steer, e.g. (0.6, 0.95) on a 32-layer model
+# steers layers 19-30 -- matching the paper's guidance to freeze early layers
+# (low-level semantics) and the last couple of layers (avoid overfitting).
+DEEP_ALIGN_LAYER_FRACTION_START = 0.6
+DEEP_ALIGN_LAYER_FRACTION_END = 0.95
+# Number of trailing continuation tokens averaged into each contrastive
+# example's hidden state, mirroring the paper's context-window hyperparameter
+# k (default k=3 there).
+DEEP_ALIGN_CONTEXT_TOKENS = 3
+# Multiplier applied to the (unit-normalized) steering vector added at each
+# steered layer. Higher values push harder toward the safe direction at the
+# cost of fluency/utility; tune per model.
+DEEP_ALIGN_ALPHA = 8.0
