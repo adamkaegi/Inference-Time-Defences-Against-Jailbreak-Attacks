@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
-import config
+from core import config
 import main
 from judges.runtime import JudgeResult
 

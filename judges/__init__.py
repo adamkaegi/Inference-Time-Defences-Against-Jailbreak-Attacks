@@ -1,4 +1,4 @@
-import config
+from core import config
 
 from .base import Judge
 from .harmbench_mistral import HarmBenchMistralJudge

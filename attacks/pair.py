@@ -1,7 +1,7 @@
 """PAIR-style iterative black-box prompt refinement attack using LangChain's ChatOllama."""
 
 import hashlib
-import config
+from core import config
 import re
 
 from attacks.base import Attack

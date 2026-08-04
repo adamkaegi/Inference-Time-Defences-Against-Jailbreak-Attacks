@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from defenses.base import Defense
 from defenses.smoothllm import SmoothLLMDefense
-from pipeline import build_response_chain
+from core.pipeline import build_response_chain
 
 
 class _SuffixOutputDefense(Defense):
@@ -76,7 +76,7 @@ class SmoothLLMTests(unittest.TestCase):
             generator=generate,
             jailbreak_classifier=lambda response: True,
         )
-        with patch("pipeline._make_model", side_effect=AssertionError("outer call")):
+        with patch("core.pipeline._make_model", side_effect=AssertionError("outer call")):
             chain = build_response_chain(
                 [smooth, _SuffixOutputDefense()],
                 "unused-outer-model",

@@ -8,8 +8,8 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from uuid import uuid4
 
-import config
-import run_attack_defense_matrix as matrix
+from core import config
+import core.run_attack_defense_matrix as matrix
 from attacks.pair import PAIRAttack
 
 

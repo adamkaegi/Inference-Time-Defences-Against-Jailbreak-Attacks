@@ -13,7 +13,7 @@ import re
 from collections.abc import Callable, Sequence
 from typing import Any
 
-import config
+from core import config
 from .base import Judge
 from .runtime import JudgeResult
 

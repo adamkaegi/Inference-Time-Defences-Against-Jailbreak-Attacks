@@ -10,7 +10,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-import config  # noqa: E402  (project root is added above)
+from core import config  # noqa: E402  (project root is added above)
 
 
 def parse_args() -> argparse.Namespace:

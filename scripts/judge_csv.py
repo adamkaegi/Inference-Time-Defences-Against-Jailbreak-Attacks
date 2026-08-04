@@ -17,7 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from judges import JUDGES  # noqa: E402
 from judges.base import Judge  # noqa: E402
 from judges.runtime import evaluate_judge_batch, judge_requires_target_unload  # noqa: E402
-from evaluation_reporting import format_judge_digest  # noqa: E402
+from core.evaluation_reporting import format_judge_digest  # noqa: E402
 
 
 def _default_output_path(input_path: Path, judge_name: str) -> Path:

@@ -1,0 +1,7 @@
+They're new attacks that your existing defences respond to the same way DeepInception and PAIR already do. Add TAP as a fifth column in Table 1 and you'd get a column that looks broadly like the PAIR column: perplexity near-useless, Self-Reminder doing most of the work, Llama Guard catching some. Different ASR numbers, same pattern.
+
+The reason is that a defence never sees the algorithm — it sees the string. TAP is PAIR with branching and pruning. PAPILLON's mutators are role-play and contextualization, an automated version of what DeepInception hardcodes. Both produce fluent, semantically coherent English, so they get caught (or not) by the same mechanisms.
+
+That's still worth something. A fifth column that follows the pattern is evidence the pattern is real rather than an artifact of testing two attacks. It just costs a full row of 6 defence conditions — 300 more judged responses, one cell running through SmoothLLM at 5× target calls — plus a few hours of construction, to confirm what two existing columns already suggest.
+
+Whereas a genuinely new axis would change what the defence has to watch: ciphers, low-resource languages, multi-turn attacks where no single message is harmful. Those break assumptions your current defence set doesn't know it's making. TAP and PAPILLON don't.

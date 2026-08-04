@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-import config
+from core import config
 from judges.jailbreak_bench_llama8b import (
     _REFUSAL_PROMPT,
     JailbreakBenchLlama8bJudge,

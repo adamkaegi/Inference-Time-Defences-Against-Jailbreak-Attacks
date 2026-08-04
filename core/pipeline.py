@@ -28,7 +28,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableLambda, RunnablePassthrough
 
-import config
+from core import config
 from attacks.base import Attack
 from defenses.base import Defense
 

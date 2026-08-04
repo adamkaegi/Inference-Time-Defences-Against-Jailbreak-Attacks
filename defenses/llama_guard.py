@@ -5,7 +5,7 @@ import re
 from time import perf_counter
 from typing import Any
 
-import config
+from core import config
 from .base import Defense
 from .block import DefenseBlocked
 

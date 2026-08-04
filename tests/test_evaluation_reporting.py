@@ -5,8 +5,8 @@ from pathlib import Path
 from unittest.mock import patch
 from uuid import uuid4
 
-import config
-from evaluation_reporting import (
+from core import config
+from core.evaluation_reporting import (
     format_judge_digest,
     format_matrix_digest,
     summarize_evaluated_rows,

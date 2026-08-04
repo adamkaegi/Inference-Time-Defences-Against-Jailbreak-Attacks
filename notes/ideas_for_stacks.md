@@ -1,0 +1,13 @@
+1. perplexity, self_reminder, llama_guard_output — cheap layered defense
+Perplexity catches GCG-style gibberish suffixes at input for near-zero cost; self_reminder is a free prompt-wrap that your notes say "does most of the work" against semantic attacks (DeepInception, PAIR); llama_guard_output is a content backstop. This skips SmoothLLM's 5× generation cost entirely — worth testing as a candidate for replacing SmoothLLM's semantic-defense contribution with something far cheaper, since SmoothLLM's actual value proposition (perturbation breaking a fragile trigger) is really about GCG, not semantic attacks.
+
+2. perplexity, smoothllm, self_reminder, llama_guard_output — full stack
+Every attack family gets a dedicated countermeasure: perplexity → gibberish, smoothllm → fragile token triggers, self_reminder → semantic/roleplay framing, llama_guard_output → content backstop. This is the natural ceiling to compare against your current proposal stack (perplexity,smoothllm,llama_guard_output), and it directly answers the open gap in MIDTERM_MISSING_PIECES.md about defense ordering/stacking not yet being compared beyond the proposal-aligned set. The interesting question: does adding the essentially-free self_reminder move the needle at all, or is its effect redundant with llama_guard_output?
+
+3. llama_guard_input, llama_guard_output — guard sandwich
+Same classifier family gating both ends of the exchange, no extra generation cost. Useful as an isolate: it tests whether an input that reads borderline-safe (e.g., a DeepInception framing) but produces unsafe content once the model completes the roleplay gets caught on the way out even when it wasn't caught on the way in — i.e., whether the two checkpoints are correlated or catch genuinely different cases.
+
+4. self_reminder, llama_guard_output — lean semantic-attack stack
+Targets exactly the attack family your notes flag perplexity as "near-useless" against (DeepInception/PAIR), without paying for perplexity's low-value screening or SmoothLLM's 5× cost on those inputs. This isolates whether perplexity/SmoothLLM contribute anything on top of stack #4 for semantic attacks, or only earn their cost against GCG — which is the real question your current single proposal stack can't answer since it never varies.
+
+Ordering note: input-stage defenses (perplexity, self_reminder, llama_guard_input) run before generation, so gating with llama_guard_input ahead of smoothllm would short-circuit the 5× generation cost on obviously-unsafe requests — none of your current stacks exploit that, and it's a cheap efficiency test alongside the ASR comparison.

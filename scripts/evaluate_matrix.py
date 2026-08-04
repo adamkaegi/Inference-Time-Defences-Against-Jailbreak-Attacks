@@ -16,8 +16,8 @@ from datetime import datetime
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-import config  # noqa: E402
-from evaluation_reporting import (  # noqa: E402
+from core import config  # noqa: E402
+from core.evaluation_reporting import (  # noqa: E402
     MATRIX_FIELDNAMES,
     format_matrix_digest,
     summarize_evaluated_rows,
