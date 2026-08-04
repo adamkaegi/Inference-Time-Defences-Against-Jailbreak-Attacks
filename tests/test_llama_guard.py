@@ -66,7 +66,8 @@ def test_conversation_builders_preserve_native_roles():
     assert build_input_guard_conversation("hello") == [
         {"role": "user", "content": "hello"}
     ]
-    assert build_output_guard_conversation("answer") == [
+    assert build_output_guard_conversation("question", "answer") == [
+        {"role": "user", "content": "question"},
         {"role": "assistant", "content": "answer"},
     ]
 
@@ -107,10 +108,11 @@ def test_safe_output_classifies_and_preserves_response():
     classifier = FakeClassifier(decision("safe"))
     defense = LlamaGuardOutputDefense(classifier=classifier)
 
-    result = defense.apply("target answer")
+    result = defense.apply_with_context("target answer", prompt="user question")
 
     assert result == "target answer"
     assert classifier.conversations == [[
+        {"role": "user", "content": "user question"},
         {"role": "assistant", "content": "target answer"},
     ]]
 
@@ -119,7 +121,10 @@ def test_unsafe_output_is_replaced():
     classifier = FakeClassifier(decision("unsafe", ["S2"]))
     defense = LlamaGuardOutputDefense(classifier=classifier)
 
-    result = defense.apply("unsafe target answer")
+    result = defense.apply_with_context(
+        "unsafe target answer",
+        prompt="unsafe user question",
+    )
 
     assert result == defense.blocked_response
 
