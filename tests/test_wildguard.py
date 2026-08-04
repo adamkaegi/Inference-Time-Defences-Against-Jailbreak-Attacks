@@ -2,7 +2,7 @@ import hashlib
 import unittest
 from unittest.mock import Mock, patch
 
-import config
+from core import config
 from judges.runtime import JudgeResult
 from judges.wildguard import (
     _CLASSIFIER_PROMPT,
