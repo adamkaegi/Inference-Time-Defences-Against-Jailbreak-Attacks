@@ -26,7 +26,7 @@ from collections.abc import Sequence
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import Runnable, RunnableLambda
+from langchain_core.runnables import Runnable, RunnableLambda, RunnablePassthrough
 
 import config
 from attacks.base import Attack
@@ -69,6 +69,19 @@ def _defense_step(defense: Defense) -> Runnable:
     return RunnableLambda(lambda text, defense=defense: defense.apply(text))
 
 
+def _output_defense_step(defense: Defense) -> Runnable:
+    """Apply an output defense while retaining its model-facing prompt."""
+    return RunnableLambda(
+        lambda state, defense=defense: {
+            "prompt": state["prompt"],
+            "response": defense.apply_with_context(
+                state["response"],
+                prompt=state["prompt"],
+            ),
+        }
+    )
+
+
 def build_response_chain(
     defenses: Sequence[Defense],
     model_name: str,
@@ -99,23 +112,34 @@ def build_response_chain(
         # A generation-stage defense owns the target calls and returns the
         # selected assistant response. It replaces the ordinary one-call model
         # stage, while output defenses still run afterward.
-        chain = chain | _defense_step(generation_defenses[0])
+        generation_chain = _defense_step(generation_defenses[0])
     else:
         model = _make_model(model_name, dry_run, max_tokens=max_tokens)
         # ChatPromptTemplate needs a dict of template variables, so re-wrap the
         # plain string as {"text": ...} before it reaches the template.
-        chain = (
-            chain
-            | RunnableLambda(lambda text: {"text": text})
+        generation_chain = (
+            RunnableLambda(lambda text: {"text": text})
             | prompt_template
             | model
             | StrOutputParser()
         )
 
-    for defense in output_defenses:
-        chain = chain | _defense_step(defense)
+    # Retain the exact post-input-defense prompt alongside the generated text.
+    # Output defenses such as Llama Guard need the full user/assistant exchange
+    # to classify a response according to the guard model's chat template.
+    chain = (
+        chain
+        | RunnableLambda(lambda prompt: {"prompt": prompt})
+        | RunnablePassthrough.assign(
+            response=RunnableLambda(lambda state: state["prompt"])
+            | generation_chain
+        )
+    )
 
-    return chain
+    for defense in output_defenses:
+        chain = chain | _output_defense_step(defense)
+
+    return chain | RunnableLambda(lambda state: state["response"])
 
 
 def build_chain(
